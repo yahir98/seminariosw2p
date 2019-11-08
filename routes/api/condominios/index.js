@@ -48,60 +48,44 @@ function initCondominiosApi(db)
     });// saveNewProduct
  }); // post /new
 
-  router.put('/update/:conCodigo',
-    function(req, res){
-        conCollection = fileModel.getCondominios();
-        var conCodigoToModify = req.params.conCodigo;
-        var amountToAdjust = parseInt(req.body.ajustar);
-        var adjustType = req.body.tipo || 'SUB';
-        var adjustHow = (adjustType == 'ADD' ? 1 : -1);
-        var modCondominios = {};
-        var newCondominiosArray = conCollection.map(
-          function(o,i){
-            if( conCodigoToModify === o.codigo){
-              o.cuotaMensual = adjustType;
-              modCondominios = Object.assign({}, o);
-            }
-            return o;
-          }
-        ); // end map
-      conCollection = newCondominiosArray;
-      fileModel.setCondominios(
-        conCollection,
-        function (err, savedSuccesfully) {
-          if (err) {
-            res.status(400).json({ "error": "No se pudo actualizar objeto" });
-          } else {
-            res.json(modCondominios);  // req.body ===  $_POST[]
-          }
-        }
-      );
-    }
-  );// put :prdsku
+ router.put('/update/:conid',
+ function(req, res)
+ {
+   var conIdToModify = req.params.conid;
+   var nombreAct= req.body.nombre;
+   var apartamentAct = req.body.apartament;
+   conModel.updateCondominio(
+     {nombre:nombreAct, apartament:apartamentAct}, conIdToModify,
+     (err, rsult)=>{
+       if(err){
+         res.status(500).json(err);
+       }else{
+         res.status(200).json(rsult);
+       }
+     }
+     ); //updateProduct
+ }
+);// put :prdsku
 
   router.delete(
-      '/delete/:conCodigo',
-      function( req, res) {
-        conCollection = fileModel.getCondominios();
-        var conCodigoToDelete  = req.params.conCodigo;
-        var newConCollection = conCollection.filter(
-          function(o, i){
-            return conCodigoToDelete !== o.codigo;
-          }
-        ); //filter
-        conCollection = newConCollection;
-        fileModel.setCondominios(
-          conCollection,
-          function (err, savedSuccesfully) {
-            if (err) {
-              res.status(400).json({ "error": "No se pudo eliminar objeto" });
-            } else {
-              res.json({"newProdsQty": conCollection.length});
-            }
-          }
-        );
+    '/delete/:conid',
+    function( req, res) {
+
+      var id = req.params.conid || '';
+      if(id===' ')
+      {
+        return  res.status(404).json({"error": "Identificador no válido"});
       }
-    );// delete
+      conModel.deleteCondominios(id, (err, rslt)=>{
+        if(err)
+        {
+          return res.status(500).json({"error":"Ocurrió un error, intente de nuevo."});
+        }
+        return res.status(200).json({"msg":"Deleted ok"});
+        
+      }); //delete product
+    }
+  );// delete
     return router;
 }
 
