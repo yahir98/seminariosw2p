@@ -17,7 +17,20 @@ function condominiosModel(db)
             return handler(null, docs);
           }
         );
-      } // end getAllProducts
+    } // end getAllProducts
+
+    condominioModel.saveNewCondominio = (newCondominio, handler)=>
+    {
+        condominiosCollection.insertOne(newCondominio, (err, result)=>
+        {
+          if(err)
+          {
+            console.log(err);
+            return handler(err, null);
+          }
+          return handler(null, result);
+        }); //insertOne
+    }
 
     return condominioModel;
 }
